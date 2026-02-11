@@ -13,6 +13,7 @@ function addBookMarkButton(){
     bookMarkButton.style.width = '30px';
     bookMarkButton.style.cursor = 'pointer';
     question.appendChild(bookMarkButton);
+    bookMarkButton.addEventListener('click',addNewBookMarkHandler);
 }
 
 // 
@@ -22,3 +23,17 @@ observer.observe(document.body, {
   childList: true,
   subtree: true
 });
+
+function addNewBookMarkHandler(){
+  const azProblemUrl = window.location.href;
+  const uniqueId = extractUniqueId(azProblemUrl);
+  console.log(uniqueId);
+
+}
+function extractUniqueId(url){
+  // we find the index where the problems/ ends and we find the index where ? starts
+  // and extract the substring in between them to get the id..
+  const start = url.indexOf("problems/") + "problems/".length;
+  const end = url.indexOf("?",start);
+  return end === -1 ? url.substring(start) : url.substring(start,end);
+}
