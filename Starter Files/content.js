@@ -1,5 +1,5 @@
 const bookMarkImageURL = chrome.runtime.getURL('assets/bookmark.png');
-
+const AZ_PROBLEM_KEY = "AZ_PROBLEM_KEY";
 
 function addBookMarkButton(){
     const question = document.querySelector(".coding_problem_info_heading__G9ueL");
@@ -24,11 +24,25 @@ observer.observe(document.body, {
   subtree: true
 });
 
-function addNewBookMarkHandler(){
+async function addNewBookMarkHandler(){
+  
+  const currentBookMarks = await getCurrentBookMarks();
+  
   const azProblemUrl = window.location.href;
   const uniqueId = extractUniqueId(azProblemUrl);
-  console.log(uniqueId);
-
+  if(currentBookMarks.some((bookMark) => bookMark.id === uniqueId)) return;
+  // if not returned then add this question to the extension
+  const problemName = document.getElementsByClassName('coding_problem_info_heading__G9ueL')[0].innerText;
+  const bookMarkObj = {
+    url : azProblemUrl,
+    name : problemName,
+    id : uniqueId
+  }
+  const updatedBookMarks = [...currentBookMarks,bookMarkObj];
+  // now set it in sync storage
+  chrome.storage.sync.set({AZ_PROBLEM_KEY : updatedBookMarks}, () => {
+    console.log('Updated the current Book Mark');
+  });
 }
 function extractUniqueId(url){
   // we find the index where the problems/ ends and we find the index where ? starts
@@ -36,4 +50,18 @@ function extractUniqueId(url){
   const start = url.indexOf("problems/") + "problems/".length;
   const end = url.indexOf("?",start);
   return end === -1 ? url.substring(start) : url.substring(start,end);
+}
+
+function getCurrentBookMarks(){
+  
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([AZ_PROBLEM_KEY], (results) => {
+      if (chrome.runtime.lastError) {
+        console.log("here is the error");
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(results[AZ_PROBLEM_KEY] || []);
+      }
+    });
+  });
 }

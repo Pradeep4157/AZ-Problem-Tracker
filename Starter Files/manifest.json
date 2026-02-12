@@ -5,7 +5,8 @@
   "author": "Pradeep",
   "description": "Chrome Extension to track problems on AZ..",
   "permissions": [
-    ""
+    "storage",
+    "tabs"
   ],
   "content_scripts": [
     {
