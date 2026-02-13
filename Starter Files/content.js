@@ -65,3 +65,6 @@ function getCurrentBookMarks(){
     });
   });
 }
+
+// SPA Problems : Client side routing. Since load is not getting called 
+// the button doesnt appear when shifting from reading material to problem 
