@@ -24,7 +24,6 @@ becuase the flow is same just the diff is in onclick.
 
 
 
-
 */
 const AZ_PROBLEM_KEY = "AZ_PROBLEM_KEY";
 
@@ -51,13 +50,14 @@ function viewBooks(currentBookMarks){
 }
 
 function addNewBookMark(bookmark){
-    
+    // parent div that contains both title and image div
     const newBookMark = document.createElement('div');
-    
+    // div that contains problem name
     const bookmarkTitle = document.createElement('div');
+    // div that contains both add and remove image
     const bookmarkControls = document.createElement('div');
+    newBookMark.setAttribute( "url", bookmark.url);
     bookmarkTitle.textContent = bookmark.name;
-
     bookmarkTitle.classList.add('bookmark-title');
     bookmarkControls.classList.add('bookmark-controls');
     buttonOperations(assetsMapUrl["play"], onPlay, bookmarkControls);
@@ -78,14 +78,41 @@ function buttonOperations(srcImage, funcOnClick, parentDiv){
     parentDiv.appendChild(IMAGE);
     // and now we are going to add the functionality of onclick..
     IMAGE.addEventListener("click",funcOnClick);
-
-
 }
-function onPlay() {
+function onPlay(event) {
     //  this function will get executed when the  user clicks on the question in the extension.
+    // now the even.target is the button that i have pressed.
+    // i somehow need to access the url which is present in the bookmark..
+    // event's parent has bookmark.name, this add image and del image..
+    // i cannot access bookmark functionalities direclty because that is not related to this.. 
+    // maybe i can search for the name and then access the url.. 
+    // another way is that we can add the url in the problem's attribute and using .parent.parent we can access that 
+    // attribute.. 
+    // first we access the url and then 
+    const url = event.target.parentElement.parentElement.getAttribute("url");
+    chrome.tabs.create({ url: url});
+
+
 }
-function onDelete() { 
+function onDelete(event) { 
     // this function gets executed when the user wants to remove the question from the extension.
+    // when clicked we can remove the parent's parent from the dom.. 
+    // along with that we also need to remove it from the storage else it appears agian when the extension reloads..
+    const bookMarkDiv = event.target.parentElement.parentElement;
+    const urlToDelete = bookMarkDiv.getAttribute("url");
+    chrome.storage.sync.get([AZ_PROBLEM_KEY], (data) => {
+        const currentBookMarks = data[AZ_PROBLEM_KEY] || [];
+        const updateBookMarks = currentBookMarks.filter(
+            bookmark => bookmark.url !== urlToDelete
+        )
+        chrome.storage.sync.set({
+            [AZ_PROBLEM_KEY]: updateBookMarks
+        });
+
+    });
+    event.target.parentElement.parentElement.remove();
+
+    
 
 
 
